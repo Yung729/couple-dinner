@@ -157,6 +157,7 @@ export class FridgeComponent implements OnInit, OnDestroy {
       next: () => {
         this.saving.set(false);
         this.closeModal();
+        this.loadItems();
       },
       error: () => this.saving.set(false)
     });
@@ -164,6 +165,8 @@ export class FridgeComponent implements OnInit, OnDestroy {
 
   deleteItem(item: FridgeItem): void {
     if (!confirm(`Remove ${item.ingredientName} from fridge?`)) return;
-    this.fridgeService.delete(item.id).subscribe();
+    this.fridgeService.delete(item.id).subscribe({
+      next: () => this.loadItems()
+    });
   }
 }

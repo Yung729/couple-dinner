@@ -21,7 +21,9 @@ public class SseController {
     private final SseEmitterManager sseEmitterManager;
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter stream(@AuthenticationPrincipal UserDetails userDetails) {
+    public SseEmitter stream(@AuthenticationPrincipal UserDetails userDetails, jakarta.servlet.http.HttpServletResponse response) {
+        response.setHeader("X-Accel-Buffering", "no");
+        response.setHeader("Cache-Control", "no-cache");
         UUID userId = UUID.fromString(userDetails.getUsername());
         log.debug("SSE connection established for user: {}", userId);
         return sseEmitterManager.createEmitter(userId);
