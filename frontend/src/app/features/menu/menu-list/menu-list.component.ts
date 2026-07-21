@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MenuItemService } from '../../../core/menu-item.service';
 import { SseService } from '../../../core/sse.service';
 import { MenuItem } from '../../../shared/models/models';
@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-menu-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, TranslateDirective],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   template: `
     <div class="page">
       <div class="page-header">

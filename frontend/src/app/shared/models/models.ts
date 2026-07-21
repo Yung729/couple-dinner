@@ -41,7 +41,7 @@ export interface MenuItem {
   id: string;
   name: string;
   description?: string;
-  createdBy: User;
+  createdBy?: User;
   createdAt: string;
   ingredients: Ingredient[];
 }
@@ -54,10 +54,10 @@ export interface MenuItemRequest {
 
 export interface Order {
   id: string;
-  menuItem: MenuItem;
+  menuItem?: MenuItem;
   scheduledTime: string;
   status: OrderStatus;
-  requestedBy: User;
+  requestedBy?: User;
   createdAt: string;
 }
 
@@ -73,7 +73,7 @@ export interface FridgeItem {
   ingredientName: string;
   quantity: number;
   unit?: string;
-  addedBy: User;
+  addedBy?: User;
   updatedAt: string;
 }
 

@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
-import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MenuItemService } from '../../../core/menu-item.service';
 import { FridgeService } from '../../../core/fridge.service';
 import { MenuItem, FridgeItemRequest } from '../../../shared/models/models';
@@ -10,7 +10,7 @@ import { MenuItem, FridgeItemRequest } from '../../../shared/models/models';
 @Component({
   selector: 'app-menu-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, TranslateDirective],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   template: `
     <div class="page">
       <div class="page-header">

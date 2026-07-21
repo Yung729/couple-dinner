@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
-import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MenuItemService } from '../../../core/menu-item.service';
 import { OrderService } from '../../../core/order.service';
 import { MenuItem } from '../../../shared/models/models';
@@ -10,7 +10,7 @@ import { MenuItem } from '../../../shared/models/models';
 @Component({
   selector: 'app-order-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, TranslateDirective],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   template: `
     <div class="page">
       <div class="page-header">

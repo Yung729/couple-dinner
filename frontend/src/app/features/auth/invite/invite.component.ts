@@ -1,14 +1,14 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../../core/auth.service';
 import { AuthResponse } from '../../../shared/models/models';
 
 @Component({
   selector: 'app-invite',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe, TranslateDirective],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   template: `
     <div class="auth-page">
       <div class="auth-card">

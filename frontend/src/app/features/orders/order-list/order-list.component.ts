@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { OrderService } from '../../../core/order.service';
 import { SseService } from '../../../core/sse.service';
 import { Order, OrderStatus } from '../../../shared/models/models';
@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-order-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, TranslatePipe, TranslateDirective, DatePipe],
+  imports: [CommonModule, RouterLink, FormsModule, TranslatePipe, DatePipe],
   template: `
     <div class="page">
       <div class="page-header">
