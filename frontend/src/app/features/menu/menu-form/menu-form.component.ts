@@ -5,7 +5,7 @@ import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
 import { MenuItemService } from '../../../core/menu-item.service';
 import { FridgeService } from '../../../core/fridge.service';
-import { MenuItem } from '../../../shared/models/models';
+import { MenuItem, FridgeItemRequest } from '../../../shared/models/models';
 
 @Component({
   selector: 'app-menu-form',
@@ -38,27 +38,26 @@ import { MenuItem } from '../../../shared/models/models';
           </div>
 
           <div class="form-group">
-            <label class="form-label">{{ 'MENU.INGREDIENTS' | translate }}</label>
-            <div class="chips-row" style="margin-bottom:10px;">
-              @for (ing of ingredients; track ing) {
-                <span class="chip">
-                  🌿 {{ ing }}
-                  <button type="button" class="chip-remove" (click)="removeIngredient(ing)">×</button>
+            <label class="form-label">{{ 'MENU.INGREDIENTS' | translate }} (Tap to select)</label>
+            <div class="chips-row" style="margin-bottom:10px; gap:8px;">
+              @for (ing of availableFridgeItems; track ing) {
+                <span class="chip" 
+                      [style.background]="ingredients.includes(ing) ? 'var(--color-primary)' : 'var(--color-surface2)'"
+                      [style.color]="ingredients.includes(ing) ? '#fff' : 'var(--color-text)'"
+                      [style.borderColor]="ingredients.includes(ing) ? 'var(--color-primary)' : 'var(--color-border)'"
+                      (click)="toggleIngredient(ing)"
+                      style="cursor:pointer; padding:8px 14px; font-weight:500;">
+                  {{ ing }}
                 </span>
               }
+              
+              <button type="button" class="btn btn-secondary" style="padding:4px 12px; height:auto; min-height:unset; border-radius:99px;" (click)="openFridgeModal()">
+                + {{ 'FRIDGE.ADD' | translate }}
+              </button>
             </div>
-            <div class="add-ingredient-row">
-              <input type="text" class="form-control" [(ngModel)]="newIngredient" name="newIngredient"
-                     id="add-ingredient-input" list="fridge-ingredients" autocomplete="off"
-                     [placeholder]="'MENU.INGREDIENT_PLACEHOLDER' | translate"
-                     (keydown.enter)="$event.preventDefault(); addIngredient()" />
-              <datalist id="fridge-ingredients">
-                @for (ing of availableFridgeItems; track ing) {
-                  <option [value]="ing"></option>
-                }
-              </datalist>
-              <button type="button" class="btn btn-secondary" id="add-ingredient-btn" (click)="addIngredient()">+</button>
-            </div>
+            @if (availableFridgeItems.length === 0) {
+               <div class="text-sm text-muted mt-2">No ingredients in fridge yet.</div>
+            }
           </div>
 
           <button type="submit" class="btn btn-primary btn-block" id="save-menu-item-btn" [disabled]="loading()">
@@ -66,6 +65,38 @@ import { MenuItem } from '../../../shared/models/models';
           </button>
         </form>
       </div>
+
+      <!-- Add Fridge Item Modal -->
+      @if (showFridgeModal()) {
+        <div class="modal-backdrop">
+          <div class="modal">
+            <h3 class="modal-title">{{ 'FRIDGE.ADD' | translate }}</h3>
+            <form (ngSubmit)="saveFridgeItem()" #f="ngForm">
+              <div class="form-group">
+                <label class="form-label">{{ 'FRIDGE.INGREDIENT' | translate }}</label>
+                <input type="text" class="form-control" [(ngModel)]="fridgeFormReq.ingredientName" name="fname" required />
+              </div>
+              <div class="flex gap-3">
+                <div class="form-group" style="flex:1;">
+                  <label class="form-label">{{ 'FRIDGE.QUANTITY' | translate }}</label>
+                  <input type="number" class="form-control" [(ngModel)]="fridgeFormReq.quantity" name="fqty" min="0.1" step="0.1" required />
+                </div>
+                <div class="form-group" style="flex:1;">
+                  <label class="form-label">{{ 'FRIDGE.UNIT' | translate }}</label>
+                  <input type="text" class="form-control" [(ngModel)]="fridgeFormReq.unit" name="funit" [placeholder]="'FRIDGE.UNIT_PLACEHOLDER' | translate" />
+                </div>
+              </div>
+
+              <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" (click)="closeFridgeModal()">{{ 'COMMON.CANCEL' | translate }}</button>
+                <button type="submit" class="btn btn-primary" [disabled]="savingFridge()">
+                  @if (savingFridge()) { ⏳ } @else { {{ 'FRIDGE.SAVE' | translate }} }
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
     </div>
   `
 })
@@ -73,12 +104,16 @@ export class MenuFormComponent implements OnInit {
   name = '';
   description = '';
   ingredients: string[] = [];
-  newIngredient = '';
   isEdit = signal(false);
   loading = signal(false);
   error = signal('');
   availableFridgeItems: string[] = [];
   private itemId = '';
+
+  // Fridge Modal State
+  showFridgeModal = signal(false);
+  savingFridge = signal(false);
+  fridgeFormReq: FridgeItemRequest = { ingredientName: '', quantity: 1, unit: '' };
 
   constructor(
     private menuItemService: MenuItemService,
@@ -95,26 +130,52 @@ export class MenuFormComponent implements OnInit {
       this.menuItemService.getById(id).subscribe(item => {
         this.name = item.name;
         this.description = item.description || '';
-        this.ingredients = item.ingredients.map(i => i.name);
+        this.ingredients = item.ingredients.map(i => i.name.toLowerCase());
       });
     }
 
+    this.loadFridgeItems();
+  }
+
+  loadFridgeItems(): void {
     this.fridgeService.getAll().subscribe(items => {
-      // Get unique ingredient names from fridge
       this.availableFridgeItems = Array.from(new Set(items.map(i => i.ingredientName.toLowerCase())));
     });
   }
 
-  addIngredient(): void {
-    const ing = this.newIngredient.trim().toLowerCase();
-    if (ing && !this.ingredients.includes(ing)) {
+  toggleIngredient(ing: string): void {
+    if (this.ingredients.includes(ing)) {
+      this.ingredients = this.ingredients.filter(i => i !== ing);
+    } else {
       this.ingredients.push(ing);
     }
-    this.newIngredient = '';
   }
 
-  removeIngredient(ing: string): void {
-    this.ingredients = this.ingredients.filter(i => i !== ing);
+  openFridgeModal(): void {
+    this.fridgeFormReq = { ingredientName: '', quantity: 1, unit: '' };
+    this.showFridgeModal.set(true);
+  }
+
+  closeFridgeModal(): void {
+    this.showFridgeModal.set(false);
+  }
+
+  saveFridgeItem(): void {
+    if (!this.fridgeFormReq.ingredientName || this.fridgeFormReq.quantity <= 0) return;
+    this.savingFridge.set(true);
+    
+    this.fridgeService.add(this.fridgeFormReq).subscribe({
+      next: (newItem) => {
+        this.savingFridge.set(false);
+        this.closeFridgeModal();
+        const newIngName = newItem.ingredientName.toLowerCase();
+        if (!this.ingredients.includes(newIngName)) {
+           this.ingredients.push(newIngName);
+        }
+        this.loadFridgeItems();
+      },
+      error: () => this.savingFridge.set(false)
+    });
   }
 
   onSubmit(): void {
