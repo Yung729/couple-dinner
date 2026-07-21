@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: couple-dinner-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:coupledinner;DB_CLOSE_DELAY=-1;MODE=PostgreSQL}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: ${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.H2Dialect}
+        format_sql: true
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:false}
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:mySecretKeyForLocalDevOnlyPleaseChangeInProduction123456789}
+    expiration-days: 30
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:4200}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    com.coupledinner: DEBUG
+    org.springframework.security: INFO
