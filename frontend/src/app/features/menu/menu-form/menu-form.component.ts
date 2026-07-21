@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
 import { MenuItemService } from '../../../core/menu-item.service';
+import { FridgeService } from '../../../core/fridge.service';
 import { MenuItem } from '../../../shared/models/models';
 
 @Component({
@@ -48,9 +49,14 @@ import { MenuItem } from '../../../shared/models/models';
             </div>
             <div class="add-ingredient-row">
               <input type="text" class="form-control" [(ngModel)]="newIngredient" name="newIngredient"
-                     id="add-ingredient-input"
+                     id="add-ingredient-input" list="fridge-ingredients" autocomplete="off"
                      [placeholder]="'MENU.INGREDIENT_PLACEHOLDER' | translate"
                      (keydown.enter)="$event.preventDefault(); addIngredient()" />
+              <datalist id="fridge-ingredients">
+                @for (ing of availableFridgeItems; track ing) {
+                  <option [value]="ing"></option>
+                }
+              </datalist>
               <button type="button" class="btn btn-secondary" id="add-ingredient-btn" (click)="addIngredient()">+</button>
             </div>
           </div>
@@ -71,10 +77,12 @@ export class MenuFormComponent implements OnInit {
   isEdit = signal(false);
   loading = signal(false);
   error = signal('');
+  availableFridgeItems: string[] = [];
   private itemId = '';
 
   constructor(
     private menuItemService: MenuItemService,
+    private fridgeService: FridgeService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -90,6 +98,11 @@ export class MenuFormComponent implements OnInit {
         this.ingredients = item.ingredients.map(i => i.name);
       });
     }
+
+    this.fridgeService.getAll().subscribe(items => {
+      // Get unique ingredient names from fridge
+      this.availableFridgeItems = Array.from(new Set(items.map(i => i.ingredientName.toLowerCase())));
+    });
   }
 
   addIngredient(): void {
